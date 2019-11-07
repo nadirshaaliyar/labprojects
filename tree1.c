@@ -1,20 +1,18 @@
 #include<stdio.h>
-#include<stdio.h>
+#include<stdlib.h>
 
-typdef struct node
+typedef struct node
 {
   int data;
-  int flag=0;
   struct node* left;
-  struct node* root;
   struct node* right;
 }node;
 
-node* t;
-int insert(int c);
-int traversal(int c);
-int deletion(int x);
-int search(int x);
+node* t=NULL,*tptr;
+void insert(int n);
+int traversal(int c,node*tptr);
+void deletion(node* tptr);
+node* search(int x);
 
 void main()
 {
@@ -24,26 +22,24 @@ void main()
   do
     {
       tptr=t;
-      printf("1.Insertion\n2.Travesal\n3.Deletion\n4.Searching\n");
+      printf("1.Insertion\n2.Travesal\n3.Deletion\n");
       scanf("%d",&choice);
       switch(choice)
 	{
 	case 1:printf("Enter element to insert:");
 	  scanf("%d",&c);
 	  insert(c);
-	case 2: printf("\nPreorder\n2.Inorder\n2.Postorder");
+	  break;
+	case 2: printf("\n1.Preorder\n2.Inorder\n3.Postorder");
 	  scanf("%d",&c);
 	  traversal(c,tptr);
-
-	case 3: printf("\nEnter element to delete\n")
+      break;    
+	case 3: printf("\nEnter element to delete\n");
 	  scanf("%d",&x);
-	  deletion(x);
-
-	case 4: printf("\nEnter element to be searched\n")
-	  scanf("%d",&x);
-	  int k=search(x);
-	  if(k) printf("\nElement is found");
-	  else printf("\nElement not found");
+	  if(search(x)==NULL) printf("\nElement does not exist\n");
+	  else 
+	  deletion(search(x));
+	  break;
 	default:printf("\nWrong Input\n");
 	}
       printf("\nDo you want to continue(1|0):");
@@ -51,54 +47,57 @@ void main()
     }while(ch);
 }
 
-int insert(int n)
+void insert(int n)
 {
-  node*curr=t,prev==NULL;
-  node* newnode=malloc(sizeof(node*));
-  newnode->data=n;
-  newnode->left=NULL;
-  newnode->right=NULL;
-  if(t==NULL)
-    {
-      t=newnode;
-      return;
+  node* cur=t,*prev=NULL;
+    node* newnode=malloc(sizeof(node*));
+    newnode->data=n;
+    newnode->right=NULL;
+    newnode->left=NULL;
+    if(t==NULL) t=newnode;
+    else{
+    while(cur!=NULL){
+        prev=cur;
+        if(n==cur->data) break;
+        else if(n>cur->data) cur=cur->right;
+        else if(n<cur->data) cur=cur->left;
     }
-  while(curr!=NULL)
-    {
-      prev=curr;
-      if(n==curr->data) break;
-      else if(n>curr->data) curr=curr->right;
-      else if(n<curr->data) curr=curr->left;
+    if(prev->data<n) prev->right=newnode;
+    else prev->left=newnode;
     }
-  return;
 }
 int traversal(int c,node* tptr)
 {
   if (c==1)     //NLR
     {
-      if(tptr==NULL) return;
+      if(tptr==NULL) return 0;
       else{
-	printf("%d",tptr->data);
+	printf("%d ",tptr->data);
 	traversal(1,tptr->left);
 	traversal(1,tptr->right);
+	return  0;
       }
     }
   if (c==2)     //LNR
     {
-     if(tptr==NULL) return;
-      else{
+      if(tptr==NULL) return 0;
+     else
+	{
 	traversal(2,tptr->left);
-	printf("%d",tptr->data);
-	traversal(2,tptr->right);
+	    printf("%d ",tptr->data);
+	    traversal(2,tptr->right);
+	    return 0;  
       }
     }
   if (c==3)     //LRN
     {
-      if(tptr==NULL) return;
-      else{
+      if(tptr==NULL) return 0;
+      else
+	{
 	traversal(3,tptr->left);
-	traversal(3,tptr->right);
-	printf("%d",tptr->data);
+	  traversal(3,tptr->right);
+	      printf("%d ",tptr->data);
+	      return 0;
       }
     }
   else
@@ -106,41 +105,85 @@ int traversal(int c,node* tptr)
   return 0;
 }
 
-int deletion(int x,node* tptr)
+void deletion(node *tptr)
 {
-  node* temp;
-  if(tptr==NULL) return;
-  else{
-    if(x==tptr->data)
+  node *ptr,*parent=NULL,*s=NULL;
+  int temp;
+  if(t==NULL)
+    printf("Empty Tree ");
+  else
+    {
+      ptr=t;
+      int flag=0;
+      while((ptr!=NULL)&&(flag==0))
+	{
+	  if(tptr->data>ptr->data)
+	    {
+	      parent=ptr;
+	      ptr=ptr->right;
+	    }
+	  else if(tptr->data<ptr->data)
+	    {
+	      parent=ptr;
+	      ptr=ptr->left;
+	    }
+	  else
       {
-	if (tptr->left==NULL && tptr->right==NULL)
-	  {
-	    temp=tptr;
-	    tptr=tptr->root;
-	    if (tptr->left==temp)
-	      tptr->left=NULL;
-	    else
-	      tptr->right=NULL;
-	    free(temp);
-	    return;
-	  }
-	else
-	  {
-	    
-	  }
-    deletion(x,tptr->left);
-    deletion(x,tptr->right);
-  }
-  
+	flag=1;
+      }
+	}
+      if(flag==0)
+	printf("Value Not found");
+      else if((ptr->left==NULL)&&(ptr->right==NULL))
+	{
+	  if(parent->left==ptr)
+	    parent->left=NULL;
+	  else
+	    parent->right=NULL;
+	  free(ptr);
+	}
+      else if((ptr->left!=NULL)&&(ptr->right!=NULL))
+    {
+      s=ptr->right;
+      while(s->left!=NULL)
+	{ 
+	  s=s->left;
+	}
+      temp=s->data; 
+    
+    deletion(s); 
+    ptr->data=temp;
+    //free(ptr);
+    }
+      else
+	{
+	  if(parent->left==ptr)
+	    {
+	      if(ptr->left==NULL)
+		parent->left=ptr->right;
+	      else
+		parent->left=ptr->left;
+	    } 
+	  else if(parent->right==ptr)
+	    {
+	      if(ptr->left==NULL)
+		parent->right=ptr->right;
+	      else
+		parent->right=ptr->left;
+	    }  
+	  free(ptr);   
+	}    
+    }      
 }
 
-    int search(int x,node* tptr)
+node* search(int x)
 {
-  if(tptr==NULL) return;
-  else{
-    if(x==tptr->data) return 1;
-    search(x,tptr->left);
-    search(x,tptr->right);
-  }
-  return 0;
+    node* curr=t;
+    while(curr!=NULL)
+    {
+        if(x==curr->data) return curr;
+        else if(x>curr->data) curr=curr->right;
+        else if(x<curr->data) curr=curr->left;
+    }
+    return NULL;
 }
